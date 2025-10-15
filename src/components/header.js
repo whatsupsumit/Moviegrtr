@@ -145,6 +145,34 @@ const Header = () => {
             <div className="absolute -bottom-2 left-0 w-0 h-0.5 bg-pink-400 group-hover:w-full transition-all duration-300"></div>
           </button>
 
+          <button
+            onClick={() => handleNavigation("/recommendations")}
+            className={`relative font-['Arvo',serif] hover:text-purple-400 transition-all duration-300 font-medium group text-xs lg:text-sm xl:text-base px-2 py-1 rounded-lg ${
+              isActive("/recommendations") ? "text-purple-400" : "text-nexus-text"
+            }`}
+          >
+            <span className="relative z-10">FOR YOU</span>
+            <div className="absolute inset-0 bg-purple-500/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+            {isActive("/recommendations") && (
+              <div className="absolute -bottom-2 left-0 w-full h-0.5 bg-purple-400" />
+            )}
+            <div className="absolute -bottom-2 left-0 w-0 h-0.5 bg-purple-400 group-hover:w-full transition-all duration-300"></div>
+          </button>
+
+          <button
+            onClick={() => handleNavigation("/groups")}
+            className={`relative font-['Arvo',serif] hover:text-blue-400 transition-all duration-300 font-medium group text-xs lg:text-sm xl:text-base px-2 py-1 rounded-lg ${
+              isActive("/groups") ? "text-blue-400" : "text-nexus-text"
+            }`}
+          >
+            <span className="relative z-10">GROUPS</span>
+            <div className="absolute inset-0 bg-blue-500/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+            {isActive("/groups") && (
+              <div className="absolute -bottom-2 left-0 w-full h-0.5 bg-blue-400" />
+            )}
+            <div className="absolute -bottom-2 left-0 w-0 h-0.5 bg-blue-400 group-hover:w-full transition-all duration-300"></div>
+          </button>
+
           {/* AI Chat Tab - Fixed Responsive Alignment */}
           <button
             onClick={() => handleNavigation("/neural-chat")}
@@ -177,6 +205,8 @@ const Header = () => {
             { path: "/movies", icon: "🎬", color: "yellow" },
             { path: "/tv-shows", icon: "📺", color: "green" },
             { path: "/vault", icon: "🗃️", color: "pink" },
+            { path: "/recommendations", icon: "⭐", color: "purple" },
+            { path: "/groups", icon: "👥", color: "blue" },
             { path: "/neural-chat", icon: "🧠", color: "cyan" }
           ].map((item) => (
             <button
@@ -353,6 +383,8 @@ const Header = () => {
               { path: "/movies", label: "MOVIES", icon: "🎬", color: "yellow" },
               { path: "/tv-shows", label: "SERIES", icon: "📺", color: "green" },
               { path: "/vault", label: "VAULT", icon: "🗃️", color: "pink" },
+              { path: "/recommendations", label: "FOR YOU", icon: "⭐", color: "purple" },
+              { path: "/groups", label: "GROUPS", icon: "👥", color: "blue" },
               { path: "/neural-chat", label: "NEURAL AI", icon: "🧠", color: "cyan" }
             ].map((item, index) => (
               <button

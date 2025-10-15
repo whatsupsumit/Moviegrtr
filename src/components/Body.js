@@ -8,6 +8,8 @@ import TVShowDetails from './TVShowDetails';
 import Vault from './Vault';
 import Profile from './Profile';
 import NeuralChat from './NeuralChat';
+import Recommendations from './Recommendations';
+import Groups from './Groups';
 import { useDispatch, useSelector } from 'react-redux';
 import { createBrowserRouter, RouterProvider, Navigate, useLocation } from 'react-router-dom';
 import { onAuthStateChanged } from "firebase/auth";
@@ -224,6 +226,62 @@ const Body = () => {
     {
       path: "/my-list",
       element: <Navigate to="/vault" replace />
+    },
+    {
+      path: "/recommendations",
+      element: (
+        <ProtectedRoute>
+          <div>
+            <Header />
+            <div className="relative min-h-screen text-white">
+              {/* NEXUS Background */}
+              <div 
+                className="fixed inset-0 w-full h-full z-0"
+                style={{
+                  backgroundImage: "url('redeye.png')",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                  backgroundAttachment: "fixed"
+                }}
+              />
+              <div className="fixed inset-0 z-10 bg-gradient-to-t from-black via-black/60 to-black/80" />
+              
+              <div className="relative z-20">
+                <Recommendations />
+              </div>
+            </div>
+          </div>
+        </ProtectedRoute>
+      )
+    },
+    {
+      path: "/groups",
+      element: (
+        <ProtectedRoute>
+          <div>
+            <Header />
+            <div className="relative min-h-screen text-white">
+              {/* NEXUS Background */}
+              <div 
+                className="fixed inset-0 w-full h-full z-0"
+                style={{
+                  backgroundImage: "url('redeye.png')",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                  backgroundAttachment: "fixed"
+                }}
+              />
+              <div className="fixed inset-0 z-10 bg-gradient-to-t from-black via-black/60 to-black/80" />
+              
+              <div className="relative z-20">
+                <Groups />
+              </div>
+            </div>
+          </div>
+        </ProtectedRoute>
+      )
     },
     {
       path: "/profile",

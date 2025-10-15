@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getMovieDetails, getMovieCredits, getMovieVideos, getMovieRecommendations } from '../utils/vidsrcApi';
 import { safeOpenExternal } from '../utils/safeNavigation';
+import { trackMovieInteraction } from '../utils/userHistoryService';
+import { getUserGroups, proposeMovieToGroup } from '../utils/groupService';
+import { sendProposalNotification } from '../utils/emailService';
 import VideoPlayer from './VideoPlayer';
 
 const MovieDetails = () => {
@@ -15,6 +18,9 @@ const MovieDetails = () => {
   const [showPlayer, setShowPlayer] = useState(false);
   const [isInVault, setIsInVault] = useState(false);
   const [backgroundVisible, setBackgroundVisible] = useState(false);
+  const [showGroupModal, setShowGroupModal] = useState(false);
+  const [userGroups, setUserGroups] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState('');
 
   useEffect(() => {
     const loadMovieData = async () => {
@@ -47,6 +53,9 @@ const MovieDetails = () => {
           // Extract results array from API response
           setVideos(videosData?.results || []);
           setRecommendations(recommendationsData?.results || []);
+
+          // Track movie view
+          await trackMovieInteraction(movieData, 'view');
 
           // Check if movie is in vault
           const vault = JSON.parse(localStorage.getItem('nexus_vault') || '[]');
@@ -113,6 +122,66 @@ const MovieDetails = () => {
       currency: 'USD',
       minimumFractionDigits: 0
     }).format(amount);
+  };
+
+  const handleProposeToGroup = async () => {
+    try {
+      // Load user's groups
+      const groups = await getUserGroups();
+      setUserGroups(groups);
+      
+      if (groups.length === 0) {
+        alert('You need to create a group first! Go to the Groups page to create one.');
+        navigate('/groups');
+        return;
+      }
+      
+      setShowGroupModal(true);
+    } catch (error) {
+      console.error('Error loading groups:', error);
+      alert('Failed to load groups. Please try again.');
+    }
+  };
+
+  const confirmProposal = async () => {
+    if (!selectedGroup) {
+      alert('Please select a group');
+      return;
+    }
+
+    try {
+      console.log('=== PROPOSING MOVIE ===');
+      console.log('Selected Group ID:', selectedGroup);
+      console.log('Movie:', movie);
+      
+      const groupData = userGroups.find(g => (g.id || g.groupId) === selectedGroup);
+      console.log('Group Data:', groupData);
+      
+      if (!groupData) {
+        alert('Group not found!');
+        return;
+      }
+      
+      // Create the proposal
+      console.log('Creating proposal...');
+      const proposal = await proposeMovieToGroup(selectedGroup, movie);
+      console.log('Proposal created:', proposal);
+      
+      // Send email notifications to group members
+      console.log('Sending emails to:', groupData.members);
+      const emailResult = await sendProposalNotification(proposal, groupData.members || [], groupData.name || 'Your Group');
+      console.log('Email result:', emailResult);
+      
+      setShowGroupModal(false);
+      setSelectedGroup('');
+      alert('Movie proposed to group successfully! 🎬 Members will be notified via email. 📧');
+      console.log('=== PROPOSAL COMPLETE ===');
+    } catch (error) {
+      console.error('=== PROPOSAL ERROR ===');
+      console.error('Error:', error);
+      console.error('Error message:', error.message);
+      alert(`Failed to propose movie: ${error.message}`);
+    }
   };
 
   if (showPlayer && movie) {
@@ -327,6 +396,16 @@ const MovieDetails = () => {
                       />
                     </svg>
                     {isInVault ? 'IN VAULT' : 'ADD TO VAULT'}
+                  </button>
+
+                  <button
+                    onClick={handleProposeToGroup}
+                    className="border-2 border-blue-500 text-blue-400 hover:bg-blue-500/10 px-6 sm:px-8 py-4 sm:py-3 rounded-lg font-['JetBrains_Mono',monospace] font-bold flex items-center justify-center transition-all duration-300 transform hover:scale-105 w-full sm:w-auto order-3"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    PROPOSE TO GROUP
                   </button>
 
                   {trailer && (
@@ -596,6 +675,69 @@ const MovieDetails = () => {
           </div>
         )}
       </div>
+
+      {/* Group Proposal Modal */}
+      {showGroupModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-lg p-8 max-w-md w-full border border-gray-800">
+            <h2 className="font-['JetBrains_Mono',monospace] text-2xl font-bold mb-6 text-white">
+              Propose to Group
+            </h2>
+            
+            <div className="mb-6">
+              <div className="flex items-start space-x-4 mb-4">
+                {movie.poster_path && (
+                  <img
+                    src={`https://image.tmdb.org/t/p/w200${movie.poster_path}`}
+                    alt={movie.title}
+                    className="w-20 h-30 object-cover rounded"
+                  />
+                )}
+                <div>
+                  <h3 className="font-bold text-white mb-1">{movie.title}</h3>
+                  <p className="text-sm text-gray-400">
+                    ⭐ {movie.vote_average?.toFixed(1)}
+                  </p>
+                </div>
+              </div>
+              
+              <label className="block text-sm font-['JetBrains_Mono',monospace] mb-2 text-gray-300">
+                Select Group
+              </label>
+              <select
+                value={selectedGroup}
+                onChange={(e) => setSelectedGroup(e.target.value)}
+                className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2 text-white focus:outline-none focus:border-red-500"
+              >
+                <option value="">Choose a group...</option>
+                {userGroups.map((group) => (
+                  <option key={group.id || group.groupId} value={group.id || group.groupId}>
+                    {group.name} ({group.members?.length || 0} members)
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={confirmProposal}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white font-['JetBrains_Mono',monospace] px-4 py-2 rounded transition-colors"
+              >
+                Propose Movie
+              </button>
+              <button
+                onClick={() => {
+                  setShowGroupModal(false);
+                  setSelectedGroup('');
+                }}
+                className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-['JetBrains_Mono',monospace] px-4 py-2 rounded transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
