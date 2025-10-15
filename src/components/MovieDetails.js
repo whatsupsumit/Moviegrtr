@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getMovieDetails, getMovieCredits, getMovieVideos, getMovieRecommendations } from '../utils/vidsrcApi';
 import { safeOpenExternal } from '../utils/safeNavigation';
 import VideoPlayer from './VideoPlayer';
+import DescriptionModal from './DescriptionModal';
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -15,6 +16,7 @@ const MovieDetails = () => {
   const [showPlayer, setShowPlayer] = useState(false);
   const [isInVault, setIsInVault] = useState(false);
   const [backgroundVisible, setBackgroundVisible] = useState(false);
+  const [showSpoiler, setShowSpoiler] = useState(false);
 
   useEffect(() => {
     const loadMovieData = async () => {
@@ -297,6 +299,18 @@ const MovieDetails = () => {
                 <p className="text-gray-300 text-lg leading-relaxed">
                   {movie.overview}
                 </p>
+                
+                {/* SPOILER Button */}
+                <button
+                  onClick={() => setShowSpoiler(true)}
+                  className="mt-4 bg-yellow-600/20 border-2 border-yellow-500/50 text-yellow-300 hover:bg-yellow-600/30 hover:border-yellow-400 px-6 py-3 rounded-lg font-['JetBrains_Mono',monospace] font-bold flex items-center gap-2 transition-all duration-300 transform hover:scale-105"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <span>⚠️ SPOILER ALERT</span>
+                </button>
               </div>
 
               {/* Action Buttons - Enhanced for responsive with better mobile visibility */}
@@ -596,6 +610,21 @@ const MovieDetails = () => {
           </div>
         )}
       </div>
+      
+      {/* Spoiler Description Modal */}
+      {movie && (
+        <DescriptionModal
+          isOpen={showSpoiler}
+          onClose={() => setShowSpoiler(false)}
+          title={movie.title}
+          overview={movie.overview}
+          fullDescription={movie.overview}
+          posterPath={movie.backdrop_path || movie.poster_path}
+          rating={movie.vote_average?.toFixed(1)}
+          releaseDate={movie.release_date ? new Date(movie.release_date).getFullYear() : 'TBA'}
+          genres={movie.genres || []}
+        />
+      )}
     </div>
   );
 };

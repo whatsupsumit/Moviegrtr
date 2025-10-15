@@ -39,29 +39,30 @@
 
 ## 🚀 **Live Demo**
 
-🌐 **[Visit NEXUS Live](https://your-vercel-url.vercel.app)**
+🌐 **[Visit Moviegrtr Live](https://github.com/whatsupsumit/Moviegrtr)**
 
 *Experience the future of entertainment streaming*
 
 ## 📸 **Screenshots**
 
 ### Home Page
-![NEXUS Home](https://via.placeholder.com/800x400/1a1a1a/ef4444?text=NEXUS+Home+Page)
+![Moviegrtr Home](https://via.placeholder.com/800x400/1a1a1a/ef4444?text=Moviegrtr+Home+Page)
 
 ### Video Player
-![NEXUS Player](https://via.placeholder.com/800x400/1a1a1a/ef4444?text=Advanced+Video+Player)
+![Moviegrtr Player](https://via.placeholder.com/800x400/1a1a1a/ef4444?text=Advanced+Video+Player)
 
 ### TV Series Management
-![NEXUS Series](https://via.placeholder.com/800x400/1a1a1a/ef4444?text=TV+Series+Episodes)
+![Moviegrtr Series](https://via.placeholder.com/800x400/1a1a1a/ef4444?text=TV+Series+Episodes)
 
 ## 🛠️ **Tech Stack**
 
 ### **Frontend**
 ```bash
-React 18.2.0          # Modern React with hooks and concurrent features
-Redux Toolkit          # State management with RTK Query
+React 19.1.0          # Latest React with concurrent features
+Redux Toolkit          # State management
 React Router v7        # Client-side routing
 Tailwind CSS 3.4+     # Utility-first CSS framework
+Framer Motion 12+     # Advanced animations & 3D effects
 Lenis Scroll           # Smooth scrolling experience
 Lucide React           # Beautiful icon system
 ```
@@ -72,6 +73,7 @@ Firebase Auth          # User authentication
 Firebase Firestore     # Real-time database
 VidSrc API            # Video streaming integration
 TMDB API              # Movie and TV show metadata
+Google Gemini AI      # AI-powered movie recommendations
 Vercel                # Deployment and hosting
 ```
 
@@ -95,8 +97,8 @@ VS Code               # Development environment
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/whatsupsumit/The-Nexus.git
-   cd The-Nexus
+   git clone https://github.com/whatsupsumit/Moviegrtr.git
+   cd Moviegrtr
    ```
 
 2. **Install dependencies**
@@ -120,9 +122,12 @@ VS Code               # Development environment
    REACT_APP_FIREBASE_APP_ID=your_app_id
    REACT_APP_FIREBASE_MEASUREMENT_ID=your_measurement_id
    
-   # Optional: TMDB API (for real data)
+   # TMDB API (for real data)
    REACT_APP_TMDB_API_KEY=your_tmdb_api_key
    REACT_APP_TMDB_ACCESS_TOKEN=your_tmdb_access_token
+   
+   # Google Gemini AI (for recommendations)
+   REACT_APP_GEMINI_API_KEY=your_gemini_api_key
    ```
 
 4. **Start development server**
@@ -170,20 +175,22 @@ VS Code               # Development environment
 src/
 ├── components/          # React components
 │   ├── Body.js         # Main content area
-│   ├── Browse.js       # Content browsing
+│   ├── Browse.js       # Content browsing with 3D effects
 │   ├── header.js       # Navigation header
-│   ├── Login.js        # Authentication
+│   ├── Login.js        # Authentication with 3D marquee
 │   ├── Movies.js       # Movie grid
 │   ├── TVShows.js      # TV series grid
 │   ├── VideoPlayer.js  # Advanced video player
 │   ├── MovieDetails.js # Movie information
 │   ├── TVShowDetails.js# TV show information
 │   ├── Profile.js      # User profile
-│   └── Vault.js        # Saved content
+│   ├── Vault.js        # Saved content
+│   └── ThreeDMarquee.js# 3D animated marquee component
 ├── utils/              # Utility functions
 │   ├── firebase.js     # Firebase configuration
 │   ├── vidsrcApi.js    # Video streaming API
 │   ├── validate.js     # Form validation
+│   ├── helpers.js      # Helper functions (cn utility)
 │   └── userSlice.js    # Redux user slice
 ├── hooks/              # Custom React hooks
 │   └── useLenis.js     # Smooth scroll hook
@@ -280,7 +287,7 @@ const MOCK_TV_SHOWS = {
 
 - **🔒 Secure Authentication**: Firebase Auth integration
 - **🛡️ Environment Variables**: Sensitive data protection
-- **🚫 Error Suppression**: Advanced console error handling
+- **🚫 Advanced Error Suppression**: Clean console experience
 - **🔐 Protected Routes**: Authenticated access only
 - **🧹 XSS Prevention**: Input sanitization and validation
 
@@ -327,9 +334,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙋‍♂️ **Support**
 
-- **GitHub Issues**: [Report bugs](https://github.com/whatsupsumit/The-Nexus/issues)
+- **GitHub Issues**: [Report bugs](https://github.com/whatsupsumit/Moviegrtr/issues)
 - **Email**: sksumitboss123@gmail.com
-- **Discord**: Join our community server
+- **Collaboration**: This is a collaborative project - contributions welcome!
 
 ## 🎯 **Roadmap**
 
@@ -344,6 +351,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ ] Content analytics
 
 ### **Recent Updates**
+- ✅ 3D Marquee background with animated movie posters
+- ✅ Google Gemini AI integration for smart recommendations
+- ✅ Enhanced login page with stunning visuals
+- ✅ Framer Motion animations throughout
 - ✅ Advanced video player with TV series support
 - ✅ Mock data system for reliable demonstration
 - ✅ Enhanced responsive design
@@ -359,15 +370,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 **Links**
 
-- **Live Demo**: [https://your-vercel-url.vercel.app](https://your-vercel-url.vercel.app)
-- **Repository**: [https://github.com/whatsupsumit/The-Nexus](https://github.com/whatsupsumit/The-Nexus)
-- **Issues**: [https://github.com/whatsupsumit/The-Nexus/issues](https://github.com/whatsupsumit/The-Nexus/issues)
+- **Repository**: [https://github.com/whatsupsumit/Moviegrtr](https://github.com/whatsupsumit/Moviegrtr)
+- **Issues**: [https://github.com/whatsupsumit/Moviegrtr/issues](https://github.com/whatsupsumit/Moviegrtr/issues)
+- **Collaborators**: Open for contributions!
 
 ---
 
 <div align="center">
-  <h3>🎬 Built with ❤️ for entertainment lovers</h3>
-  <p>Experience the future of streaming with NEXUS</p>
+  <h3>🎬 Built with ❤️ by a collaborative team</h3>
+  <p>Experience modern streaming with Moviegrtr</p>
   
-  **[⭐ Star this repo](https://github.com/whatsupsumit/The-Nexus) | [🐛 Report Bug](https://github.com/whatsupsumit/The-Nexus/issues) | [✨ Request Feature](https://github.com/whatsupsumit/The-Nexus/issues)**
+  **[⭐ Star this repo](https://github.com/whatsupsumit/Moviegrtr) | [🐛 Report Bug](https://github.com/whatsupsumit/Moviegrtr/issues) | [✨ Request Feature](https://github.com/whatsupsumit/Moviegrtr/issues)**
 </div>

@@ -48,10 +48,10 @@ const MovieCard = memo(({ movie, onClick, isTV = false, customBadge = null }) =>
   
   return (
     <div 
-      className="movie-card relative aspect-[2/3] bg-gray-900 rounded-lg border border-red-800/50 cursor-pointer overflow-hidden will-change-transform min-h-[200px] sm:min-h-[240px] md:min-h-[280px]"
-      onClick={() => onClick(movie)}
-      style={{ transform: 'translateZ(0)' }}
-    >
+        className="movie-card relative aspect-[2/3] bg-gray-900 rounded-lg border border-red-800/50 cursor-pointer overflow-hidden will-change-transform min-h-[200px] sm:min-h-[240px] md:min-h-[280px]"
+        onClick={() => onClick(movie)}
+        style={{ transform: 'translateZ(0)' }}
+      >
       {/* Movie Poster */}
       {posterPath ? (
         <img
