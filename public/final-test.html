@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Final Email Test</title>
+</head>
+<body style="font-family: Arial; padding: 40px; text-align: center;">
+    <h1>📧 FINAL EMAIL TEST</h1>
+    <h2>Service ID: service_zch5uod ✅</h2>
+    
+    <button onclick="send()" style="padding: 20px 40px; font-size: 24px; background: #4CAF50; color: white; border: none; cursor: pointer; border-radius: 10px; margin: 30px;">
+        🚀 SEND EMAIL NOW
+    </button>
+    
+    <div id="result" style="margin-top: 30px; padding: 20px; border-radius: 10px; font-size: 18px;"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+        async function send() {
+            const result = document.getElementById('result');
+            const btn = event.target;
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ SENDING...';
+            result.style.background = '#fff3cd';
+            result.innerHTML = '⏳ Sending to ketanmishra71@gmail.com...';
+            
+            try {
+                emailjs.init('37_XtPYJCDpBe5k5y');
+                
+                const response = await emailjs.send('service_zch5uod', 'template_3c5zryf', {
+                    to_email: 'ketanmishra71@gmail.com',
+                    to_name: 'Ketan',
+                    from_name: 'Moviegrtr',
+                    group_name: 'Test Group',
+                    movie_title: 'The Matrix',
+                    movie_overview: '✅✅✅ SUCCESS! Your Moviegrtr email system is WORKING!',
+                    movie_rating: '8.7'
+                });
+                
+                result.style.background = '#d4edda';
+                result.style.color = '#155724';
+                result.innerHTML = '<h2>✅ SUCCESS!</h2><p>Email sent to ketanmishra71@gmail.com</p><p><strong>Check your inbox and SPAM folder!</strong></p>';
+                btn.textContent = '✅ EMAIL SENT!';
+                btn.style.background = '#28a745';
+                
+                alert('✅ SUCCESS! Email sent to ketanmishra71@gmail.com\n\nCheck your inbox and spam folder!');
+            } catch (error) {
+                result.style.background = '#f8d7da';
+                result.style.color = '#721c24';
+                result.innerHTML = '<h2>❌ FAILED</h2><p>' + (error.text || error.message) + '</p>';
+                btn.disabled = false;
+                btn.textContent = '🔄 TRY AGAIN';
+                
+                alert('❌ Error: ' + (error.text || error.message));
+            }
+        }
+    </script>
+</body>
+</html>

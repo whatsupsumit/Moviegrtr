@@ -163,6 +163,11 @@ const MovieDetails = () => {
         alert('Group not found!');
         return;
       }
+
+      if (!groupData.members || groupData.members.length === 0) {
+        alert('This group has no members!');
+        return;
+      }
       
       // Create the proposal
       console.log('Creating proposal...');
@@ -170,19 +175,37 @@ const MovieDetails = () => {
       console.log('Proposal created:', proposal);
       
       // Send email notifications to group members
-      console.log('Sending emails to:', groupData.members);
-      const emailResult = await sendProposalNotification(proposal, groupData.members || [], groupData.name || 'Your Group');
-      console.log('Email result:', emailResult);
+      console.log('Sending emails to group members:', groupData.members);
+      console.log('Group name:', groupData.name);
+      
+      const emailResult = await sendProposalNotification(
+        proposal, 
+        groupData.members, 
+        groupData.name || 'Your Group'
+      );
+      
+      console.log('Email sending result:', emailResult);
       
       setShowGroupModal(false);
       setSelectedGroup('');
-      alert('Movie proposed to group successfully! 🎬 Members will be notified via email. 📧');
+      
+      if (emailResult.success) {
+        if (emailResult.mode === 'email') {
+          alert(`🎬 Movie proposed successfully!\n\n📧 Sent ${emailResult.count} email notification(s) to group members.\n\nCheck the browser console for details.`);
+        } else {
+          alert('🎬 Movie proposed successfully!\n\n⚠️ Running in demo mode - emails not sent.\nTo enable emails, ensure @emailjs/browser is installed and configured.');
+        }
+      } else {
+        alert(`⚠️ Movie proposed, but email notification failed:\n${emailResult.error}\n\nProposal was saved to the database.`);
+      }
+      
       console.log('=== PROPOSAL COMPLETE ===');
     } catch (error) {
       console.error('=== PROPOSAL ERROR ===');
       console.error('Error:', error);
       console.error('Error message:', error.message);
-      alert(`Failed to propose movie: ${error.message}`);
+      console.error('Error stack:', error.stack);
+      alert(`❌ Failed to propose movie: ${error.message}`);
     }
   };
 

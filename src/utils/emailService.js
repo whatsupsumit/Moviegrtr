@@ -43,6 +43,13 @@ const loadEmailJS = async () => {
  */
 export const sendProposalNotification = async (proposal, groupMembers, groupName = 'Your Group') => {
   try {
+    console.log('🔄 Starting email notification process...');
+    console.log('EmailJS Config:', {
+      serviceId: EMAILJS_SERVICE_ID,
+      templateId: EMAILJS_PROPOSAL_TEMPLATE,
+      publicKey: EMAILJS_PUBLIC_KEY ? '✓ Set' : '✗ Missing'
+    });
+    
     const emailJSClient = await loadEmailJS();
     if (!emailJSClient) {
       // Fallback: Log to console
@@ -54,32 +61,53 @@ export const sendProposalNotification = async (proposal, groupMembers, groupName
       return { success: true, mode: 'demo' };
     }
 
+    console.log('✅ EmailJS client loaded successfully');
+    console.log('📧 Preparing to send emails to group members:', groupMembers);
+    
     // Send email to each group member (except the proposer)
-    const emailPromises = groupMembers
-      .filter(member => member.email !== proposal.proposedByEmail)
-      .map(member => {
-        const templateParams = {
-          to_email: member.email,
-          to_name: member.displayName || member.email,
-          from_name: proposal.proposedByName,
-          group_name: groupName,
-          movie_title: proposal.movieTitle,
-          movie_overview: proposal.movieOverview || 'Check out this movie!',
-          movie_rating: proposal.movieRating || 'N/A'
-        };
+    const recipients = groupMembers.filter(member => member.email !== proposal.proposedByEmail);
+    console.log(`📨 Sending to ${recipients.length} members (excluding proposer)`);
+    
+    const emailPromises = recipients.map(async (member, index) => {
+      const templateParams = {
+        to_email: member.email,
+        to_name: member.displayName || member.email,
+        from_name: proposal.proposedByName,
+        group_name: groupName,
+        movie_title: proposal.movieTitle,
+        movie_overview: proposal.movieOverview || 'Check out this movie!',
+        movie_rating: proposal.movieRating || 'N/A'
+      };
 
-        return emailJSClient.send(
+      console.log(`📧 Email ${index + 1}/${recipients.length}:`, {
+        to: member.email,
+        movie: proposal.movieTitle
+      });
+
+      try {
+        const result = await emailJSClient.send(
           EMAILJS_SERVICE_ID,
           EMAILJS_PROPOSAL_TEMPLATE,
           templateParams
         );
-      });
+        console.log(`✅ Email sent to ${member.email}:`, result);
+        return result;
+      } catch (emailError) {
+        console.error(`❌ Failed to send email to ${member.email}:`, emailError);
+        throw emailError;
+      }
+    });
 
-    await Promise.all(emailPromises);
-    console.log('Proposal notifications sent successfully');
+    const results = await Promise.all(emailPromises);
+    console.log('✅ All proposal notifications sent successfully:', results);
     return { success: true, mode: 'email', count: emailPromises.length };
   } catch (error) {
-    console.error('Error sending proposal notifications:', error);
+    console.error('❌ Error sending proposal notifications:', error);
+    console.error('Error details:', {
+      message: error.message,
+      text: error.text,
+      status: error.status
+    });
     return { success: false, error: error.message };
   }
 };
