@@ -1,10 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
+import { VoiceAssistant } from "../utils/voiceAssistant";
 
 const NeuralChat = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef(null);
+  const voiceAssistantRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
