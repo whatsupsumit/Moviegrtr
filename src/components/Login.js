@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
 import { checkValidatedata } from "../utils/validate";
@@ -9,12 +9,23 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { useNavigate, useLocation } from "react-router-dom";
+import ThreeDMarquee from "./ThreeDMarquee";
+import { fetchTrendingMoviesCached } from "../utils/vidsrcApi";
+
+// HACKATHON: Add these imports for the security check
+import axios from "axios";
+import sha1 from "js-sha1";
 
 // Enhanced Login component with better responsiveness and animations
 const Login = () => {
   const [isSignInForm, setIsSignInForm] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [moviePosters, setMoviePosters] = useState([]);
+  
+  // HACKATHON: Add this new state to hold the password security warning
+  const [pwnedPasswordError, setPwnedPasswordError] = useState(null);
+
   const nameRef = useRef(null);
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
@@ -24,6 +35,67 @@ const Login = () => {
 
   // Get the intended destination from location state, default to /browse
   const from = location.state?.from || '/browse';
+
+  // Fetch trending movie posters for 3D Marquee background
+  useEffect(() => {
+    const loadMoviePosters = async () => {
+      try {
+        const response = await fetchTrendingMoviesCached();
+        if (response && response.results) {
+          const posters = response.results
+            .slice(0, 20) // Get 20 movies for nice distribution
+            .map(movie => `https://image.tmdb.org/t/p/w500${movie.poster_path}`)
+            .filter(poster => poster); // Remove any null posters
+          setMoviePosters(posters);
+        }
+      } catch (error) {
+        console.error('Error loading movie posters:', error);
+        // Fallback to placeholder images if API fails
+        setMoviePosters([
+          'https://via.placeholder.com/300x450?text=NEXUS+1',
+          'https://via.placeholder.com/300x450?text=NEXUS+2',
+          'https://via.placeholder.com/300x450?text=NEXUS+3',
+          'https://via.placeholder.com/300x450?text=NEXUS+4'
+        ]);
+      }
+    };
+    loadMoviePosters();
+  }, []);
+
+  // HACKATHON: Add this function to check the password against the API
+  const checkPasswordSafety = async (password) => {
+    // Don't check if the password field is empty
+    if (!password) {
+      setPwnedPasswordError(null);
+      return;
+    }
+
+    // 1. Hash the password and prepare it for the API
+    const passwordHash = sha1(password).toUpperCase();
+    const hashPrefix = passwordHash.substring(0, 5);
+    const hashSuffix = passwordHash.substring(5);
+
+    try {
+      // 2. Call the public "Have I Been Pwned" API
+      const response = await axios.get(`https://api.pwnedpasswords.com/range/${hashPrefix}`);
+      
+      // 3. Check if our password's hash is in the list of breached passwords
+      const isPwned = response.data.split('\r\n').some(line => {
+        return line.split(':')[0] === hashSuffix;
+      });
+
+      if (isPwned) {
+        // 4. If it is, set the warning message!
+        setPwnedPasswordError('Warning: This password has been found in a data breach. Please choose a different one.');
+      } else {
+        // Otherwise, clear any previous warning
+        setPwnedPasswordError(null);
+      }
+    } catch (error) {
+      console.error("Error checking password:", error);
+      setPwnedPasswordError(null); // Don't block the user if the API fails
+    }
+  };
 
   const handleButtonClick = async () => {
     setIsLoading(true);
@@ -43,6 +115,13 @@ const Login = () => {
 
     // Sign in and sign up logic
     if (!isSignInForm) {
+      // HACKATHON: Add this check to block submission
+      if (pwnedPasswordError) {
+        setErrorMessage(pwnedPasswordError); // Show the error in your main error box
+        setIsLoading(false);
+        return; // Stop the function here
+      }
+
       // Sign up logic
       try {
         const userCredential = await createUserWithEmailAndPassword(
@@ -152,10 +231,21 @@ const Login = () => {
 
   return (
     <div className="relative h-screen w-full bg-gradient-to-br from-black via-gray-900 to-black font-['JetBrains_Mono',monospace] overflow-hidden">
-      {/* Enhanced Background with Parallax Effect */}
+      {/* 3D Marquee Background with Movie Posters */}
+      {moviePosters.length > 0 && (
+        <div className="absolute inset-0 opacity-20 pointer-events-none">
+          <ThreeDMarquee 
+            images={moviePosters}
+            aspect="poster"
+            className="w-full h-full"
+          />
+        </div>
+      )}
+
+      {/* Enhanced Background with Parallax Effect - Now more subtle */}
       <div className="absolute inset-0 w-full h-full">
         <div
-          className="absolute inset-0 w-full h-full opacity-30 transform scale-105 transition-transform duration-1000"
+          className="absolute inset-0 w-full h-full opacity-15 transform scale-105 transition-transform duration-1000"
           style={{
             backgroundImage: "url('nexusbg.png')",
             backgroundSize: "cover",
@@ -324,9 +414,25 @@ const Login = () => {
                     type="password"
                     placeholder="Password"
                     className="w-full p-2 sm:p-2.5 lg:p-3 bg-gray-900/90 backdrop-blur-sm rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500/50 border border-gray-700/50 focus:border-red-500/50 transition-all duration-300 text-sm sm:text-base group-hover:bg-gray-800/90"
+                    // HACKATHON: Add this onChange event
+                    onChange={(e) => {
+                      // Only check the password on the "Create Account" form
+                      if (!isSignInForm) {
+                        checkPasswordSafety(e.target.value);
+                      }
+                    }}
                   />
                   <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-red-600/10 to-red-800/10 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                 </div>
+
+                {/* HACKATHON: Add this code block to display the security warning */}
+                {!isSignInForm && pwnedPasswordError && (
+                  <div className="relative p-2 sm:p-2.5 bg-yellow-900/30 border border-yellow-500/50 rounded-lg backdrop-blur-sm">
+                    <p className="text-yellow-400 text-xs sm:text-sm font-bold leading-tight">
+                      {pwnedPasswordError}
+                    </p>
+                  </div>
+                )}
                 
                 {/* Password Requirements for Sign Up - Updated validation display */}
                 {!isSignInForm && (
@@ -409,22 +515,7 @@ const Login = () => {
                 </button>
               </div>
 
-              {/* Sign Up Instructions */}
-              {!isSignInForm && (
-                <div className="relative z-10 mt-2 sm:mt-3 p-2 sm:p-2.5 bg-blue-900/20 border border-blue-500/30 rounded-lg">
-                  <div className="flex items-start space-x-2">
-                    <svg className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div className="text-xs text-blue-300">
-                      <p className="font-medium mb-1">Demo Account Info:</p>
-                      <p className="text-blue-200/80">
-                        You can use any random email and password for testing. No real verification required!
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
+              
 
               {/* Ultra Responsive Toggle Section */}
               <div className="relative z-10 mt-3 sm:mt-4 text-center">

@@ -90,7 +90,7 @@ const ContentCarousel = memo(({ title, content = [], onItemClick, isTV = false, 
             {content.map((item, index) => (
               <div 
                 key={item.id || index} 
-                className="flex-shrink-0 w-36 xs:w-40 sm:w-44 md:w-48 lg:w-52"
+                className="flex-shrink-0 w-36 xs:w-40 sm:w-44 md:w-48 lg:w-52 transition-all duration-300 hover:scale-105"
                 style={{ transform: 'translateZ(0)' }}
               >
                 <MovieCard

@@ -383,6 +383,19 @@ body, html, div, span, h1, h2, h3, h4, h5, h6, p, a, button, input, textarea, se
   }
 }
 
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 3s linear infinite;
+}
+
 /* Loading Spinner Utility */
 .loading-spinner {
   display: inline-block;
