@@ -76,7 +76,6 @@ const Movies = () => {
       try {
         let movieData = [];
         let response = {};
-
         switch (currentFilter) {
           case 'trending':
             response = await fetchTrendingMovies();
@@ -244,7 +243,6 @@ const Movies = () => {
               </div>
             </div>
           )}
-
           <div className="relative group">
             <input
               type="text"
