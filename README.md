@@ -1,4 +1,4 @@
-# 🎬 NEXUS - Advanced Entertainment Matrix
+# 🎬 NEXUS - Advanced Entertainment Matrix.
 
 [![React](https://img.shields.io/badge/React-18.2.0-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://reactjs.org/)
 [![Firebase](https://img.shields.io/badge/Firebase-9.0+-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
