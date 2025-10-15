@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
 import { checkValidatedata } from "../utils/validate";
@@ -9,12 +9,15 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { useNavigate, useLocation } from "react-router-dom";
+import ThreeDMarquee from "./ThreeDMarquee";
+import { fetchTrendingMoviesCached } from "../utils/vidsrcApi";
 
 // Enhanced Login component with better responsiveness and animations
 const Login = () => {
   const [isSignInForm, setIsSignInForm] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [moviePosters, setMoviePosters] = useState([]);
   const nameRef = useRef(null);
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
@@ -24,6 +27,32 @@ const Login = () => {
 
   // Get the intended destination from location state, default to /browse
   const from = location.state?.from || '/browse';
+
+  // Fetch trending movie posters for 3D Marquee background
+  useEffect(() => {
+    const loadMoviePosters = async () => {
+      try {
+        const response = await fetchTrendingMoviesCached();
+        if (response && response.results) {
+          const posters = response.results
+            .slice(0, 20) // Get 20 movies for nice distribution
+            .map(movie => `https://image.tmdb.org/t/p/w500${movie.poster_path}`)
+            .filter(poster => poster); // Remove any null posters
+          setMoviePosters(posters);
+        }
+      } catch (error) {
+        console.error('Error loading movie posters:', error);
+        // Fallback to placeholder images if API fails
+        setMoviePosters([
+          'https://via.placeholder.com/300x450?text=NEXUS+1',
+          'https://via.placeholder.com/300x450?text=NEXUS+2',
+          'https://via.placeholder.com/300x450?text=NEXUS+3',
+          'https://via.placeholder.com/300x450?text=NEXUS+4'
+        ]);
+      }
+    };
+    loadMoviePosters();
+  }, []);
 
   const handleButtonClick = async () => {
     setIsLoading(true);
@@ -152,10 +181,21 @@ const Login = () => {
 
   return (
     <div className="relative h-screen w-full bg-gradient-to-br from-black via-gray-900 to-black font-['JetBrains_Mono',monospace] overflow-hidden">
-      {/* Enhanced Background with Parallax Effect */}
+      {/* 3D Marquee Background with Movie Posters */}
+      {moviePosters.length > 0 && (
+        <div className="absolute inset-0 opacity-20 pointer-events-none">
+          <ThreeDMarquee 
+            images={moviePosters}
+            aspect="poster"
+            className="w-full h-full"
+          />
+        </div>
+      )}
+
+      {/* Enhanced Background with Parallax Effect - Now more subtle */}
       <div className="absolute inset-0 w-full h-full">
         <div
-          className="absolute inset-0 w-full h-full opacity-30 transform scale-105 transition-transform duration-1000"
+          className="absolute inset-0 w-full h-full opacity-15 transform scale-105 transition-transform duration-1000"
           style={{
             backgroundImage: "url('nexusbg.png')",
             backgroundSize: "cover",
