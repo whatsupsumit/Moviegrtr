@@ -285,11 +285,22 @@ const MOCK_TV_SHOWS = {
 
 ## 🛡️ **Security Features**
 
+
 - **🔒 Secure Authentication**: Firebase Auth integration
 - **🛡️ Environment Variables**: Sensitive data protection
 - **🚫 Advanced Error Suppression**: Clean console experience
 - **🔐 Protected Routes**: Authenticated access only
 - **🧹 XSS Prevention**: Input sanitization and validation
+
+## Pwned Password Check
+
+This project integrates with the **Have I Been Pwned** API to provide a real-time security check on user passwords during registration.
+
+### How It Works
+
+1.  On the "Create Account" form, as the user types their password, it is **hashed on the client-side** using SHA-1.
+2.  The application sends only the **first 5 characters** of the hash to the Pwned Passwords API. This technique, called k-Anonymity, ensures the user's actual password is never exposed.
+3.  If the API finds a match in its database of breached passwords, a warning is displayed in real-time, and the user is blocked from signing up until they choose a more secure password.
 
 ## 🎨 **Design System**
 
