@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>App Email Test</title>
+</head>
+<body style="font-family: Arial; padding: 40px;">
+    <h1>🔧 EmailJS Setup Check</h1>
+    
+    <h2>Quick Actions:</h2>
+    <ol>
+        <li><strong>Go to:</strong> <a href="https://dashboard.emailjs.com/admin" target="_blank">https://dashboard.emailjs.com/admin</a></li>
+        <li><strong>Check your Email Services</strong> - Copy the Service ID (starts with "service_")</li>
+        <li><strong>Make sure it's ACTIVE</strong> (green toggle)</li>
+        <li><strong>Check Email Templates</strong> - Find template ID</li>
+    </ol>
+
+    <h2>Your Current Config:</h2>
+    <pre style="background: #f0f0f0; padding: 15px; border-radius: 5px;">
+Service ID: service_ptezuw3
+Template ID: template_3c5zryf
+Public Key: 37_XtPYJCDpBe5k5y
+    </pre>
+
+    <h2>Test with YOUR Service ID:</h2>
+    <p>Service ID: <input type="text" id="serviceId" value="service_ptezuw3" style="width: 200px; padding: 5px;"></p>
+    <p>Template ID: <input type="text" id="templateId" value="template_3c5zryf" style="width: 200px; padding: 5px;"></p>
+    <p>Public Key: <input type="text" id="publicKey" value="37_XtPYJCDpBe5k5y" style="width: 300px; padding: 5px;"></p>
+    <p>Your Email: <input type="email" id="email" value="ketanmishra71@gmail.com" style="width: 250px; padding: 5px;"></p>
+    
+    <button onclick="testEmail()" style="padding: 15px 30px; font-size: 18px; background: #4CAF50; color: white; border: none; cursor: pointer; border-radius: 5px; margin-top: 20px;">
+        📧 TEST EMAIL
+    </button>
+    
+    <div id="result" style="margin-top: 20px; padding: 15px; border-radius: 5px;"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+        async function testEmail() {
+            const result = document.getElementById('result');
+            const btn = event.target;
+            
+            const serviceId = document.getElementById('serviceId').value;
+            const templateId = document.getElementById('templateId').value;
+            const publicKey = document.getElementById('publicKey').value;
+            const email = document.getElementById('email').value;
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ Sending...';
+            result.style.background = '#fff3cd';
+            result.innerHTML = '⏳ Initializing EmailJS...';
+            
+            try {
+                // Initialize
+                emailjs.init(publicKey);
+                result.innerHTML = '⏳ Sending email to ' + email + '...';
+                
+                // Send
+                const response = await emailjs.send(serviceId, templateId, {
+                    to_email: email,
+                    to_name: 'Test User',
+                    from_name: 'Moviegrtr',
+                    group_name: 'Test Group',
+                    movie_title: 'The Matrix',
+                    movie_overview: '✅ Email system working!',
+                    movie_rating: '8.7'
+                });
+                
+                result.style.background = '#d4edda';
+                result.innerHTML = '✅ <strong>SUCCESS!</strong><br><br>' +
+                    'Email sent to: ' + email + '<br>' +
+                    'Service ID: ' + serviceId + '<br>' +
+                    'Template ID: ' + templateId + '<br><br>' +
+                    'Response: ' + JSON.stringify(response) + '<br><br>' +
+                    '<strong>Check your inbox and SPAM folder!</strong>';
+                btn.textContent = '✅ Sent!';
+                
+                alert('✅ Email sent! Check ' + email);
+            } catch (error) {
+                result.style.background = '#f8d7da';
+                result.innerHTML = '❌ <strong>ERROR</strong><br><br>' +
+                    'Message: ' + (error.text || error.message) + '<br>' +
+                    'Status: ' + (error.status || 'unknown') + '<br><br>' +
+                    'Full error: <pre>' + JSON.stringify(error, null, 2) + '</pre><br><br>' +
+                    '<strong>SOLUTIONS:</strong><br>' +
+                    '1. Check Service ID is correct at <a href="https://dashboard.emailjs.com/admin" target="_blank">EmailJS Dashboard</a><br>' +
+                    '2. Make sure service is ACTIVE (green toggle)<br>' +
+                    '3. Verify template ID exists<br>' +
+                    '4. Check public key is correct in Account settings';
+                
+                btn.disabled = false;
+                btn.textContent = '🔄 Try Again';
+                
+                alert('❌ Error: ' + (error.text || error.message));
+            }
+        }
+    </script>
+</body>
+</html>

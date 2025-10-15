@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Email Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+    <h1>Click the button</h1>
+    <button id="btn" style="padding: 20px; font-size: 20px;">SEND EMAIL</button>
+    <p id="msg"></p>
+    <script>
+        document.getElementById('btn').onclick = function() {
+            document.getElementById('msg').innerHTML = 'Sending...';
+            emailjs.init('37_XtPYJCDpBe5k5y');
+            emailjs.send('service_zch5uod', 'template_3c5zryf', {
+                to_email: 'ketanmishra71@gmail.com',
+                to_name: 'Ketan',
+                from_name: 'Test',
+                group_name: 'Group',
+                movie_title: 'Matrix',
+                movie_overview: 'Test',
+                movie_rating: '8'
+            }).then(function() {
+                document.getElementById('msg').innerHTML = 'SUCCESS! Check email!';
+                alert('Email sent!');
+            }).catch(function(e) {
+                document.getElementById('msg').innerHTML = 'ERROR: ' + e.text;
+                alert('Error: ' + e.text);
+            });
+        };
+    </script>
+</body>
+</html>
