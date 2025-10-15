@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const DescriptionModal = ({ isOpen, onClose, title, overview, fullDescription, posterPath, rating, releaseDate, genres = [] }) => {
+const DescriptionModal = ({ isOpen, onClose, title, overview, fullDescription, posterPath, rating, releaseDate, genres = [], isSpoiler = false, isLoading = false }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [description, setDescription] = useState(overview || '');
 
   useEffect(() => {
     if (isOpen) {
@@ -32,11 +31,6 @@ const DescriptionModal = ({ isOpen, onClose, title, overview, fullDescription, p
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
-    if (!isExpanded && fullDescription) {
-      setDescription(fullDescription);
-    } else {
-      setDescription(overview || '');
-    }
   };
 
   // Truncate text for preview
@@ -61,13 +55,13 @@ const DescriptionModal = ({ isOpen, onClose, title, overview, fullDescription, p
           />
 
           {/* Modal */}
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 pt-28 md:pt-32 pointer-events-none overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: 'spring', duration: 0.5 }}
-              className="relative max-w-4xl w-full pointer-events-auto"
+              className="relative max-w-4xl w-full pointer-events-auto my-8"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Glass Card */}
@@ -161,32 +155,51 @@ const DescriptionModal = ({ isOpen, onClose, title, overview, fullDescription, p
                     transition={{ delay: 0.4 }}
                   >
                     <div className="flex items-center gap-2 mb-4">
+                      {isSpoiler && (
+                        <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                      )}
                       <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <h3 className="text-lg font-bold text-red-400 font-['JetBrains_Mono',monospace]">
-                        SYNOPSIS
+                        {isSpoiler ? '⚠️ AI-GENERATED SPOILERS' : 'SYNOPSIS'}
                       </h3>
                     </div>
 
-                    {/* Description Text */}
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={isExpanded ? 'full' : 'short'}
-                        initial={{ opacity: 0, height: 'auto' }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 'auto' }}
-                        transition={{ duration: 0.3 }}
-                        className="overflow-hidden"
-                      >
-                        <p className="text-gray-300 leading-relaxed text-sm sm:text-base mb-4 font-['JetBrains_Mono',monospace]">
-                          {isExpanded ? (fullDescription || overview) : shortDescription}
+                    {/* Loading State */}
+                    {isLoading && (
+                      <div className="flex flex-col items-center justify-center py-8 space-y-4">
+                        <svg className="w-12 h-12 text-yellow-400 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <p className="text-gray-400 font-['JetBrains_Mono',monospace] text-sm animate-pulse">
+                          🤖 Gemini AI is generating detailed spoilers...
                         </p>
-                      </motion.div>
-                    </AnimatePresence>
+                      </div>
+                    )}
+
+                    {/* Description Text */}
+                    {!isLoading && (
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={isExpanded ? 'full' : 'short'}
+                          initial={{ opacity: 0, height: 'auto' }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 'auto' }}
+                          transition={{ duration: 0.3 }}
+                          className="overflow-hidden"
+                        >
+                          <p className="text-gray-300 leading-relaxed text-sm sm:text-base mb-4 font-['JetBrains_Mono',monospace] whitespace-pre-wrap">
+                            {isExpanded ? (fullDescription || overview) : shortDescription}
+                          </p>
+                        </motion.div>
+                      </AnimatePresence>
+                    )}
 
                     {/* Read More/Less Button */}
-                    {hasMoreContent && (
+                    {!isLoading && hasMoreContent && (
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}

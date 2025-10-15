@@ -4,11 +4,13 @@ import { auth } from "../utils/firebase";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { removeUser } from "../utils/userSlice";
+import SearchModal from "./SearchModal";
 
 const Header = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
   const dropdownRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const navigate = useNavigate();
@@ -38,6 +40,18 @@ const Header = () => {
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [location.pathname]);
+
+  // Ctrl+K to open search
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchModalOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleSignOut = () => {
     signOut(auth)
@@ -75,15 +89,17 @@ const Header = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header className="fixed top-0 left-0 w-full flex items-center justify-between px-2 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 md:py-4 z-50 bg-black/95 border-b border-red-800/30 backdrop-blur-md">
+    <header className="fixed top-4 left-4 right-4 mx-auto max-w-6xl flex items-center justify-between px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 z-50 bg-black/70 border border-red-800/30 backdrop-blur-xl rounded-2xl shadow-2xl shadow-red-900/20 transition-all duration-300 hover:shadow-red-900/30">
+      {/* Subtle glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-red-900/5 via-transparent to-red-900/5 rounded-2xl pointer-events-none" />
 
       {/* Logo - Responsive sizing */}
       <div
         className="font-['Arvo',serif] text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-red-500 tracking-wider cursor-pointer hover:text-red-400 z-10 transition-all duration-300 hover:scale-105"
         onClick={() => handleNavigation(user ? "/browse" : "/")}
       >
-        <span className="hidden sm:inline">NEXUS</span>
-        <span className="sm:hidden">NX</span>
+        <span className="hidden sm:inline">MOVIEGRTR</span>
+        <span className="sm:hidden">MG</span>
       </div>
 
       {/* Desktop Navigation Menu - Enhanced responsive */}
@@ -210,6 +226,23 @@ const Header = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
             )}
           </svg>
+        </button>
+      )}
+
+      {/* Search Button */}
+      {user && (
+        <button
+          onClick={() => setSearchModalOpen(true)}
+          className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-black/40 border border-red-500/30 text-gray-300 hover:text-white hover:border-red-500/60 hover:bg-red-600/10 transition-all duration-300 group"
+          title="Search (Ctrl+K)"
+        >
+          <svg className="w-4 h-4 group-hover:text-red-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <span className="hidden lg:inline text-xs font-['JetBrains_Mono',monospace]">Search</span>
+          <kbd className="hidden xl:inline-block px-1.5 py-0.5 text-[10px] bg-white/10 border border-white/20 rounded font-['JetBrains_Mono',monospace]">
+            Ctrl+K
+          </kbd>
         </button>
       )}
 
@@ -412,6 +445,9 @@ const Header = () => {
           }
         }
       `}</style>
+
+      {/* Search Modal */}
+      <SearchModal isOpen={searchModalOpen} onClose={() => setSearchModalOpen(false)} />
     </header>
   );
 };
