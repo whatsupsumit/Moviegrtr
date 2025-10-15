@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quick Email Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body style="font-family: Arial; padding: 40px; background: #f0f0f0;">
+    <h1>Quick Email Test</h1>
+    <p>Email: <strong>ketanmishra71@gmail.com</strong></p>
+    <button onclick="sendEmail()" style="padding: 15px 30px; font-size: 18px; background: #4CAF50; color: white; border: none; cursor: pointer; border-radius: 5px;">
+        📧 SEND TEST EMAIL NOW
+    </button>
+    <div id="status" style="margin-top: 20px; padding: 15px; border-radius: 5px;"></div>
+
+    <script>
+        function sendEmail() {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = '⏳ Sending...';
+            
+            const status = document.getElementById('status');
+            status.style.background = '#fff3cd';
+            status.innerHTML = '⏳ Sending email...';
+            
+            // Initialize EmailJS
+            emailjs.init('37_XtPYJCDpBe5k5y');
+            
+            // Send email
+            emailjs.send('service_ptezuw3', 'template_3c5zryf', {
+                to_email: 'ketanmishra71@gmail.com',
+                to_name: 'Ketan',
+                from_name: 'Moviegrtr System',
+                group_name: 'Test Group',
+                movie_title: 'The Matrix',
+                movie_overview: '✅ SUCCESS! Your email system is working! This is a test from Moviegrtr.',
+                movie_rating: '8.7'
+            })
+            .then(function(response) {
+                status.style.background = '#d4edda';
+                status.innerHTML = '✅ <strong>SUCCESS!</strong><br>Email sent to ketanmishra71@gmail.com<br>Check your inbox and spam folder!<br><br>Response: ' + JSON.stringify(response);
+                btn.textContent = '✅ Email Sent!';
+                alert('✅ Email sent successfully!\n\nCheck ketanmishra71@gmail.com inbox (and spam folder)');
+            })
+            .catch(function(error) {
+                status.style.background = '#f8d7da';
+                status.innerHTML = '❌ <strong>FAILED</strong><br>Error: ' + (error.text || error.message) + '<br><br>Details: ' + JSON.stringify(error);
+                btn.disabled = false;
+                btn.textContent = '🔄 Try Again';
+                alert('❌ Failed: ' + (error.text || error.message));
+            });
+        }
+    </script>
+</body>
+</html>

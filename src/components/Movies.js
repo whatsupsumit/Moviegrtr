@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchPopularMovies, fetchTopRatedMovies, fetchTrendingMovies, searchContent } from '../utils/vidsrcApi';
+import { 
+  fetchPopularMovies, 
+  fetchTopRatedMovies, 
+  fetchTrendingMovies, 
+  searchContent, 
+  fetchUpcomingMovies // 🆕 added
+} from '../utils/vidsrcApi';
 import { detectDevice, mobileCache } from '../utils/mobileApiHelper';
 import MovieCard from './MovieCard';
 import VideoPlayer from './VideoPlayer';
@@ -26,7 +32,6 @@ const Movies = () => {
       isOffline: !navigator.onLine
     });
 
-    // Mobile-specific network listeners
     if (device.isMobile) {
       const handleOnline = () => {
         setMobileStatus(prev => ({ ...prev, isOffline: false }));
@@ -50,7 +55,6 @@ const Movies = () => {
 
       window.addEventListener('online', handleOnline);
       window.addEventListener('offline', handleOffline);
-      
       if (navigator.connection) {
         navigator.connection.addEventListener('change', handleConnectionChange);
       }
@@ -65,14 +69,13 @@ const Movies = () => {
     }
   }, []);
 
+  // Load movies based on selected filter
   useEffect(() => {
     const loadMovies = async () => {
       setLoading(true);
       try {
         let movieData = [];
         let response = {};
-        
-        // Mobile-optimized loading with enhanced error handling
         switch (currentFilter) {
           case 'trending':
             response = await fetchTrendingMovies();
@@ -82,28 +85,29 @@ const Movies = () => {
             response = await fetchTopRatedMovies();
             movieData = response.results || [];
             break;
+          case 'upcoming': // 🆕 added upcoming movies
+            response = await fetchUpcomingMovies();
+            movieData = response.results || [];
+            break;
           default:
             response = await fetchPopularMovies();
             movieData = response.results || [];
         }
 
-        // Show user feedback for mobile fallback data
         if (response.isMockData && mobileStatus.isMobile) {
           console.log('📱 Using offline movie content for mobile device');
         }
-        
+
         setMovies(movieData);
         setFilteredMovies(movieData);
 
-        // Cache data for mobile devices
+        // Cache data for mobile
         if (mobileStatus.isMobile && movieData.length > 0) {
-          mobileCache.set(`movies_${currentFilter}`, movieData, 600000); // 10 minutes
+          mobileCache.set(`movies_${currentFilter}`, movieData, 600000); // 10 min
         }
-        
+
       } catch (error) {
         console.error('Error loading movies:', error);
-        
-        // Mobile fallback - try to use any cached data
         if (mobileStatus.isMobile) {
           const cachedData = mobileCache.get(`movies_${currentFilter}`);
           if (cachedData && cachedData.length > 0) {
@@ -122,11 +126,11 @@ const Movies = () => {
         setLoading(false);
       }
     };
-    
+
     loadMovies();
   }, [currentFilter, mobileStatus.isMobile]);
 
-  // Add keyboard shortcuts
+  // Keyboard shortcut (Ctrl+G)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.ctrlKey && e.key === 'g') {
@@ -134,7 +138,6 @@ const Movies = () => {
         document.querySelector('input[type="text"]')?.focus();
       }
     };
-    
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
@@ -149,8 +152,7 @@ const Movies = () => {
     setIsSearching(true);
     try {
       const searchResults = await searchContent(query);
-      // Ensure we only get movies from search results
-      const movieResults = Array.isArray(searchResults) 
+      const movieResults = Array.isArray(searchResults)
         ? searchResults.filter(item => item.media_type === 'movie')
         : [];
       setFilteredMovies(movieResults);
@@ -163,23 +165,23 @@ const Movies = () => {
   };
 
   const handleMovieClick = (movie) => {
-    navigate(`/movie/${movie.id}`, { state: { movie: movie } });
+    navigate(`/movie/${movie.id}`, { state: { movie } });
   };
 
   const closePlayer = () => {
     setShowPlayer(false);
     setSelectedMovie(null);
-    // Navigate back to home page (Browse)
     navigate('/browse');
   };
 
+  // 🆕 Added "UPCOMING" button to filter list
   const filterButtons = [
     { key: 'trending', label: 'TRENDING', icon: '🔥', description: 'Hot movies dominating the charts' },
     { key: 'popular', label: 'POPULAR', icon: '⭐', description: 'Fan favorites across all time' },
-    { key: 'top_rated', label: 'TOP RATED', icon: '👑', description: 'Highest rated cinematic masterpieces' }
+    { key: 'top_rated', label: 'TOP RATED', icon: '👑', description: 'Highest rated cinematic masterpieces' },
+    { key: 'upcoming', label: 'UPCOMING', icon: '🚀', description: 'Movies that are about to hit theaters soon' } // 🆕
   ];
 
-  // Stats calculation - ensure filteredMovies is always an array
   const moviesArray = Array.isArray(filteredMovies) ? filteredMovies : [];
   const stats = {
     totalMovies: moviesArray.length,
@@ -192,25 +194,19 @@ const Movies = () => {
   };
 
   if (showPlayer && selectedMovie) {
-    return (
-      <VideoPlayer
-        movie={selectedMovie}
-        isTV={false}
-        onClose={closePlayer}
-      />
-    );
+    return <VideoPlayer movie={selectedMovie} isTV={false} onClose={closePlayer} />;
   }
 
   return (
     <div className="min-h-screen text-white pt-24 bg-gradient-to-br from-red-900/20 via-black to-orange-900/20">
-      {/* Animated Background Elements */}
+      {/* Animated background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-32 h-32 bg-red-500/5 rounded-full blur-xl animate-pulse"></div>
         <div className="absolute top-40 right-20 w-48 h-48 bg-orange-500/5 rounded-full blur-xl animate-pulse delay-1000"></div>
         <div className="absolute bottom-40 left-1/4 w-40 h-40 bg-yellow-500/5 rounded-full blur-xl animate-pulse delay-2000"></div>
       </div>
 
-      {/* Header Section */}
+      {/* Header */}
       <div className="relative px-8 mb-8">
         <div className="flex items-center mb-6">
           <div className="text-6xl mr-4">🎬</div>
@@ -224,9 +220,8 @@ const Movies = () => {
           </div>
         </div>
 
-        {/* Search Bar */}
+        {/* Search bar */}
         <div className="max-w-3xl mb-8">
-          {/* Mobile Status Indicator */}
           {mobileStatus.isMobile && (
             <div className="mb-4 p-3 bg-black/40 backdrop-blur-sm border border-orange-500/30 rounded-lg">
               <div className="flex items-center justify-between text-sm font-['JetBrains_Mono',monospace]">
@@ -248,7 +243,6 @@ const Movies = () => {
               </div>
             </div>
           )}
-          
           <div className="relative group">
             <input
               type="text"
@@ -272,8 +266,8 @@ const Movies = () => {
           </div>
         </div>
 
-        {/* Filter Buttons */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {/* Filter buttons */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           {filterButtons.map((filter) => (
             <button
               key={filter.key}
@@ -322,7 +316,7 @@ const Movies = () => {
         </div>
       </div>
 
-      {/* Movies Grid */}
+      {/* Movie grid */}
       <div className="px-8">
         {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -332,13 +326,9 @@ const Movies = () => {
           </div>
         ) : moviesArray.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {moviesArray.map((movie, index) => (
+            {moviesArray.map((movie) => (
               <div key={movie.id} className="transition-all duration-300 hover:scale-105">
-                <MovieCard
-                  movie={movie}
-                  onClick={handleMovieClick}
-                  isTV={false}
-                />
+                <MovieCard movie={movie} onClick={handleMovieClick} isTV={false} />
               </div>
             ))}
           </div>
